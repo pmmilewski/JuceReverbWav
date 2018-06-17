@@ -11,7 +11,8 @@ public:
     CombReverbBlock();
     CombReverbBlock(const int&, const double&);
     ~CombReverbBlock();
-    
+
+    void clear();
     double process(const double&);
 };
 

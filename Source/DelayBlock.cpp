@@ -32,6 +32,22 @@ double DelayBlock::process(const double &input_sample)
 	previous_output = output;
 	return output;
 }
+
+void DelayBlock::clear() 
+{
+	current_index = 0;
+	end = delay_samples-1;
+	full = false;
+	if(buffer != nullptr)
+	{
+		delete buffer;
+	}
+	for(auto& sample: *buffer)
+	{
+		sample = 0.0;
+	}
+}
+
 DelayBlock::DelayBlock()
 {
     std::cout << "Please don't use DelayBlock default constructor!" << std::endl;

@@ -24,3 +24,8 @@ double CombReverbBlock::process(const double &input_sample)
     return output;
 }
 
+void CombReverbBlock::clear()
+{
+    delay->clear();
+}
+

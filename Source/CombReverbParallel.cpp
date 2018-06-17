@@ -32,3 +32,11 @@ double CombReverbParallel::process(const double& input_sample)
     output /= blocks->size();
     return output;
 }
+
+int CombReverbParallel::getCount()
+{
+    if(blocks != nullptr)
+        return blocks->size();
+    else
+        return 0;
+}

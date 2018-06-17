@@ -35,18 +35,13 @@ double AllpassReverbSeries::process(const double& input_sample)
     return output;
 }
 
-/* AllpassReverbSeries::AllpassReverbSeries(const int& initial_delay, const double& gain, const int& number_of_blocks)
+int AllpassReverbSeries::getCount()
 {
-    blocks = new std::vector<AllpassReverbBlock>;
-    previous_output = 0;
-    int current_delay{initial_delay};
-    int divider{1}, addition{3}; 
-    for(size_t i=0; i < number_of_blocks; i++)
-    {
-        current_delay = initial_delay/divider;
-        blocks->push_back(AllpassReverbBlock(current_delay, gain));
-        divider *= 3;
-    }
-} 
-*/
+    if(blocks != nullptr)
+        return blocks->size();
+    else
+        return 0;
+}
+
+
 

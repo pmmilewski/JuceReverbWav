@@ -7,7 +7,7 @@ private:
 	int current_index;
 	bool full;
 	int end;
-	std::vector<double> *buffer;
+	std::vector<double> *buffer = nullptr;
     
 public:
     DelayBlock();
@@ -15,6 +15,9 @@ public:
 	~DelayBlock();
 
 	double process(const double&);
+	void clear();
+
     
     double previous_output; // will be used for loops
+	
 };

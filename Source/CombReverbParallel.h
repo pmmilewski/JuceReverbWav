@@ -13,5 +13,6 @@ public:
     
     void addBlock(const int&, const double&);
     
+    int getCount();
     double process(const double&);
 };

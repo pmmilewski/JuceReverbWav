@@ -22,3 +22,8 @@ AllpassReverbBlock::AllpassReverbBlock(const int& number_of_samples, const doubl
     loop_gain = gain;
     comb = new CombReverbBlock(number_of_samples, gain);
 }
+
+void AllpassReverbBlock::clear()
+{
+    comb->clear();
+}

@@ -12,5 +12,6 @@ public:
     AllpassReverbBlock(const int&, const double&);
     ~AllpassReverbBlock();
     
+    void clear();
     double process(const double&);
 };

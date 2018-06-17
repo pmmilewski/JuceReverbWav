@@ -54,12 +54,26 @@ private:
     void playButtonClicked();
     void stopButtonClicked();
     void loopButtonChanged();
+
+    void addAllpassButtonClicked();
+    void addCombButtonClicked();
     //==============================================================================
     // Your private member variables go here...
 
     TextButton openButton;
     TextButton playButton;
     TextButton stopButton;
+
+
+    TextButton addAllpassButton;
+    TextButton addCombButton;
+
+    Slider delaySlider;
+    Slider gainSlider;
+
+    Label allpassCountLabel;
+    Label combCountLabel;
+
     ToggleButton loopingToggle;
     Label currentPositionLabel;
 
