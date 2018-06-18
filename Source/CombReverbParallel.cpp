@@ -40,3 +40,11 @@ int CombReverbParallel::getCount()
     else
         return 0;
 }
+
+void CombReverbParallel::clear()
+{
+    for(auto& block: *blocks)
+    {
+        block.clear();
+    }
+}

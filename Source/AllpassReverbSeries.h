@@ -16,6 +16,7 @@ public:
     double previous_output;
     
     int getCount();
+    void clear();
     double process(const double&);
 };
 

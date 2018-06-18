@@ -258,6 +258,18 @@ void MainComponent::openButtonClicked()
 
 void MainComponent::playButtonClicked()
 {
+    if(left_allpassReverbs->getCount() != 0)
+    {
+        left_allpassReverbs->clear();
+        right_allpassReverbs->clear();
+    }
+    
+    if(left_combReverbs->getCount() != 0)
+    {
+        left_combReverbs->clear();
+        right_combReverbs->clear();
+    }
+
     updateLoopState(loopingToggle.getToggleState());
     changeState(Starting);
 }
@@ -274,7 +286,7 @@ void MainComponent::loopButtonChanged()
 
 void MainComponent::addAllpassButtonClicked()
 {
-    int delay_samples = readerSource->getAudioFormatReader()->sampleRate*delaySlider.getValue();
+    int delay_samples = readerSource->getAudioFormatReader()->sampleRate*delaySlider.getValue()/1000;
 
     left_allpassReverbs->addBlock(delay_samples, gainSlider.getValue());
     right_allpassReverbs->addBlock(delay_samples, gainSlider.getValue());
@@ -285,7 +297,7 @@ void MainComponent::addAllpassButtonClicked()
 
 void MainComponent::addCombButtonClicked()
 {
-    int delay_samples = readerSource->getAudioFormatReader()->sampleRate*delaySlider.getValue();
+    int delay_samples = readerSource->getAudioFormatReader()->sampleRate*delaySlider.getValue()/1000;
 
     left_combReverbs->addBlock(delay_samples, gainSlider.getValue());
     right_combReverbs->addBlock(delay_samples, gainSlider.getValue());

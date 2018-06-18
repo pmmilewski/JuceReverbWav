@@ -43,5 +43,13 @@ int AllpassReverbSeries::getCount()
         return 0;
 }
 
+void AllpassReverbSeries::clear()
+{
+    for(auto& block: *blocks)
+    {
+        block.clear();
+    }
+}
+
 
 

@@ -14,5 +14,6 @@ public:
     void addBlock(const int&, const double&);
     
     int getCount();
+    void clear();
     double process(const double&);
 };

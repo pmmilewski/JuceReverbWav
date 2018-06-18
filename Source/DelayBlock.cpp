@@ -1,4 +1,5 @@
 #include "DelayBlock.h"
+#include <memory>
 #include <iostream>
 
 DelayBlock::DelayBlock(const int &number_of_samples)
@@ -7,12 +8,11 @@ DelayBlock::DelayBlock(const int &number_of_samples)
 	current_index = 0;
 	end = delay_samples-1;
 	full = false;
-	buffer = new std::vector<double>(number_of_samples, 0.0);
+	buffer = std::make_unique<std::vector<double>>(number_of_samples, 0.0);
 }
 
 DelayBlock::~DelayBlock()
 {
-	delete buffer;
 }
 
 double DelayBlock::process(const double &input_sample) 
@@ -38,10 +38,6 @@ void DelayBlock::clear()
 	current_index = 0;
 	end = delay_samples-1;
 	full = false;
-	if(buffer != nullptr)
-	{
-		delete buffer;
-	}
 	for(auto& sample: *buffer)
 	{
 		sample = 0.0;
@@ -51,5 +47,5 @@ void DelayBlock::clear()
 DelayBlock::DelayBlock()
 {
     std::cout << "Please don't use DelayBlock default constructor!" << std::endl;
-    buffer = new std::vector<double>;
+    buffer = std::make_unique<std::vector<double>>();
 }
