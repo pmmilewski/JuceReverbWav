@@ -12,11 +12,11 @@
 MainComponent::MainComponent()
     : state(Stopped)
 {
-    left_allpassReverbs = std::make_unique<AllpassReverbSeries>();
-    left_combReverbs = std::make_unique<CombReverbParallel>();
+    left_allpassReverbs = AllpassReverbSeries();
+    left_combReverbs = CombReverbParallel();
 
-    right_allpassReverbs = std::make_unique<AllpassReverbSeries>();
-    right_combReverbs = std::make_unique<CombReverbParallel>();
+    right_allpassReverbs = AllpassReverbSeries();
+    right_combReverbs = CombReverbParallel();
 
     formatManager.registerBasicFormats();
     transportSource.addChangeListener(this);
@@ -137,21 +137,21 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
         float* rightChannelPtr = bufferToFill.buffer->getWritePointer(1);
         int numberOfSamples = bufferToFill.numSamples;
         
-        if(left_combReverbs->getCount() > 0)
+        if(left_combReverbs.getCount() > 0)
         {
             for(size_t i = 0; i < numberOfSamples; i++)
             {
-                *(leftChannelPtr+i) += left_combReverbs->process(*(leftChannelPtr+i));
-                *(rightChannelPtr+i) += right_combReverbs->process(*(rightChannelPtr+i));
+                *(leftChannelPtr+i) += left_combReverbs.process(*(leftChannelPtr+i));
+                *(rightChannelPtr+i) += right_combReverbs.process(*(rightChannelPtr+i));
             }   
         }
         
-        if(left_allpassReverbs->getCount() > 0)
+        if(left_allpassReverbs.getCount() > 0)
         {
             for(size_t i = 0; i < numberOfSamples; i++)
             {
-                *(leftChannelPtr+i) += left_allpassReverbs->process(*(leftChannelPtr+i));
-                *(rightChannelPtr+i) += right_allpassReverbs->process(*(rightChannelPtr+i));
+                *(leftChannelPtr+i) += left_allpassReverbs.process(*(leftChannelPtr+i));
+                *(rightChannelPtr+i) += right_allpassReverbs.process(*(rightChannelPtr+i));
             }
         }
         
@@ -258,16 +258,16 @@ void MainComponent::openButtonClicked()
 
 void MainComponent::playButtonClicked()
 {
-    if(left_allpassReverbs->getCount() != 0)
+    if(left_allpassReverbs.getCount() != 0)
     {
-        left_allpassReverbs->clear();
-        right_allpassReverbs->clear();
+        left_allpassReverbs.clear();
+        right_allpassReverbs.clear();
     }
     
-    if(left_combReverbs->getCount() != 0)
+    if(left_combReverbs.getCount() != 0)
     {
-        left_combReverbs->clear();
-        right_combReverbs->clear();
+        left_combReverbs.clear();
+        right_combReverbs.clear();
     }
 
     updateLoopState(loopingToggle.getToggleState());
@@ -288,10 +288,10 @@ void MainComponent::addAllpassButtonClicked()
 {
     int delay_samples = readerSource->getAudioFormatReader()->sampleRate*delaySlider.getValue()/1000;
 
-    left_allpassReverbs->addBlock(delay_samples, gainSlider.getValue());
-    right_allpassReverbs->addBlock(delay_samples, gainSlider.getValue());
+    left_allpassReverbs.addBlock(delay_samples, gainSlider.getValue());
+    right_allpassReverbs.addBlock(delay_samples, gainSlider.getValue());
 
-    allpassCountLabel.setText(std::to_string(left_allpassReverbs->getCount()), dontSendNotification);
+    allpassCountLabel.setText(std::to_string(left_allpassReverbs.getCount()), dontSendNotification);
 }
 
 
@@ -299,8 +299,8 @@ void MainComponent::addCombButtonClicked()
 {
     int delay_samples = readerSource->getAudioFormatReader()->sampleRate*delaySlider.getValue()/1000;
 
-    left_combReverbs->addBlock(delay_samples, gainSlider.getValue());
-    right_combReverbs->addBlock(delay_samples, gainSlider.getValue());
+    left_combReverbs.addBlock(delay_samples, gainSlider.getValue());
+    right_combReverbs.addBlock(delay_samples, gainSlider.getValue());
     
-    combCountLabel.setText(std::to_string(left_combReverbs->getCount()), dontSendNotification);
+    combCountLabel.setText(std::to_string(left_combReverbs.getCount()), dontSendNotification);
 }

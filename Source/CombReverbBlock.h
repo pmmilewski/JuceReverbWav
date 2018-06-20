@@ -4,7 +4,7 @@
 class CombReverbBlock
 {
 private:
-    DelayBlock* delay;
+    DelayBlock delay;
     double loop_gain;
     
 public:

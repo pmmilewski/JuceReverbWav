@@ -8,7 +8,7 @@ DelayBlock::DelayBlock(const int &number_of_samples)
 	current_index = 0;
 	end = delay_samples-1;
 	full = false;
-	buffer = std::make_unique<std::vector<double>>(number_of_samples, 0.0);
+	buffer = std::vector<double>(number_of_samples, 0.0);
 }
 
 DelayBlock::~DelayBlock()
@@ -20,8 +20,8 @@ double DelayBlock::process(const double &input_sample)
 	
 
 	double output{0};
-	output = (full)? (*buffer)[current_index] : 0.0;
-	(*buffer)[current_index] = input_sample;
+	output = (full)? (buffer)[current_index] : 0.0;
+	(buffer)[current_index] = input_sample;
 	if(!full)
 	{
 		full = (current_index == end)? true : false;
@@ -38,7 +38,7 @@ void DelayBlock::clear()
 	current_index = 0;
 	end = delay_samples-1;
 	full = false;
-	for(auto& sample: *buffer)
+	for(auto& sample: buffer)
 	{
 		sample = 0.0;
 	}
@@ -47,5 +47,5 @@ void DelayBlock::clear()
 DelayBlock::DelayBlock()
 {
     std::cout << "Please don't use DelayBlock default constructor!" << std::endl;
-    buffer = std::make_unique<std::vector<double>>();
+    buffer = std::vector<double>();
 }

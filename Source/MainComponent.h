@@ -80,11 +80,11 @@ private:
     AudioFormatManager formatManager;
     std::unique_ptr<AudioFormatReaderSource> readerSource;
 
-    std::unique_ptr<CombReverbParallel> left_combReverbs;
-    std::unique_ptr<AllpassReverbSeries> left_allpassReverbs;
+    CombReverbParallel left_combReverbs;
+    AllpassReverbSeries left_allpassReverbs;
 
-    std::unique_ptr<CombReverbParallel> right_combReverbs;
-    std::unique_ptr<AllpassReverbSeries> right_allpassReverbs;
+    CombReverbParallel right_combReverbs;
+    AllpassReverbSeries right_allpassReverbs;
 
     AudioTransportSource transportSource;
     TransportState state;

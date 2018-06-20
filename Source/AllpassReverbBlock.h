@@ -4,7 +4,7 @@
 class AllpassReverbBlock
 {
 private:
-    CombReverbBlock *comb;
+    CombReverbBlock comb;
     double loop_gain;
     
 public:

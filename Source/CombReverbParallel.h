@@ -5,7 +5,7 @@
 class CombReverbParallel
 {
 private:
-    std::vector<CombReverbBlock>* blocks;
+    std::vector<CombReverbBlock> blocks;
     
 public:
     CombReverbParallel();

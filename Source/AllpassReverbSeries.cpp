@@ -3,31 +3,23 @@
 
 AllpassReverbSeries::AllpassReverbSeries()
 {
-    blocks = nullptr;
+    blocks = std::vector<AllpassReverbBlock>();
     previous_output = 0;
 }
 
 AllpassReverbSeries::~AllpassReverbSeries()
 {
-    delete blocks;
 }
 
 void AllpassReverbSeries::addBlock(const int& delay, const double& gain)
 {
-    if(blocks == nullptr)
-    {
-        blocks = new std::vector<AllpassReverbBlock>({AllpassReverbBlock(delay, gain)});
-    }
-    else
-    {
-        blocks->push_back({AllpassReverbBlock(delay, gain)});
-    }
+        blocks.push_back({AllpassReverbBlock(delay, gain)});
 } 
 
 double AllpassReverbSeries::process(const double& input_sample)
 {
     double output{input_sample};
-    for(auto& block: *blocks)
+    for(auto& block: blocks)
     {
         output = block.process(output);
     }
@@ -37,19 +29,13 @@ double AllpassReverbSeries::process(const double& input_sample)
 
 int AllpassReverbSeries::getCount()
 {
-    if(blocks != nullptr)
-        return blocks->size();
-    else
-        return 0;
+    return blocks.size();
 }
 
 void AllpassReverbSeries::clear()
 {
-    for(auto& block: *blocks)
+    for(auto& block: blocks)
     {
         block.clear();
     }
 }
-
-
-

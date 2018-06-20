@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <memory>
 
 class DelayBlock {
 private:
@@ -8,7 +7,7 @@ private:
 	int current_index;
 	bool full;
 	int end;
-	std::unique_ptr<std::vector<double>> buffer = nullptr;
+	std::vector<double> buffer;
     
 public:
     DelayBlock();
