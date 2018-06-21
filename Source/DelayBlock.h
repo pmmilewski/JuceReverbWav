@@ -1,7 +1,9 @@
 #pragma once
+#include "IReverbBlock.h"
 #include <vector>
 
-class DelayBlock {
+class DelayBlock : public IReverbBlock 
+{
 private:
 	int delay_samples;
 	int current_index;

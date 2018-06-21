@@ -47,7 +47,12 @@
 			"tuple": "cpp",
 			"typeinfo": "cpp",
 			"utility": "cpp",
-			"valarray": "cpp"
+			"valarray": "cpp",
+			"strstream": "cpp",
+			"chrono": "cpp",
+			"ratio": "cpp",
+			"thread": "cpp",
+			"typeindex": "cpp"
 		}
 	}
 }

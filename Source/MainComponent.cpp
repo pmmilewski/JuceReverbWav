@@ -12,6 +12,10 @@
 MainComponent::MainComponent()
     : state(Stopped)
 {
+    delayCount = 0;
+    allpassCount = 0;
+    combCount = 0;
+
     left_allpassReverbs = AllpassReverbSeries();
     left_combReverbs = CombReverbParallel();
 
@@ -50,6 +54,12 @@ MainComponent::MainComponent()
     addCombButton.setColour(TextButton::buttonOnColourId, Colours::blue);
     addCombButton.setEnabled(false);
 
+    addAndMakeVisible(&addDelayButton);
+    addCombButton.setButtonText("Add Delay block");
+    addCombButton.onClick = [this] { addDelayButtonClicked(); };
+    addCombButton.setColour(TextButton::buttonOnColourId, Colours::blue);
+    addCombButton.setEnabled(false);
+
     addAndMakeVisible(&delaySlider);
     delaySlider.setRange(1.0, 1000.0, 1.0);
     delaySlider.setValue(100.0);
@@ -61,10 +71,13 @@ MainComponent::MainComponent()
     gainSlider.setEnabled(false);
 
     addAndMakeVisible(&allpassCountLabel);
-    allpassCountLabel.setText(std::to_string(0), dontSendNotification);
+    allpassCountLabel.setText(std::to_string(allpassCount), dontSendNotification);
     
     addAndMakeVisible(&combCountLabel);
-    combCountLabel.setText(std::to_string(0), dontSendNotification);
+    combCountLabel.setText(std::to_string(combCount), dontSendNotification);
+
+    addAndMakeVisible(&delayCountLabel);
+    delayCountLabel.setText(std::to_string(delayCount), dontSendNotification);
 
     addAndMakeVisible(&loopingToggle);
     loopingToggle.setButtonText("Loop");
@@ -106,14 +119,16 @@ void MainComponent::resized()
     delaySlider.setBounds(10, 100, getWidth() - 20, 20);
     gainSlider.setBounds(10, 130, getWidth() - 20, 20);
 
-    addAllpassButton.setBounds(10, 190, getWidth() - 20, 20);
-    addCombButton.setBounds(10, 160, getWidth() - 20, 20);
+    addDelayButton.setBounds(10, 160, getWidth() - 20, 20);
+    addAllpassButton.setBounds(10, 220, getWidth() - 20, 20);
+    addCombButton.setBounds(10, 190, getWidth() - 20, 20);
 
-    allpassCountLabel.setBounds(10, 310, getWidth() - 20, 20);
-    combCountLabel.setBounds(10, 280, getWidth() - 20, 20);
+    delayCountLabel.setBounds(10, 310, getWidth() - 20, 20);
+    allpassCountLabel.setBounds(10, 370, getWidth() - 20, 20);
+    combCountLabel.setBounds(10, 340, getWidth() - 20, 20);
 
-    loopingToggle.setBounds(10, 220, getWidth() - 20, 20);
-    currentPositionLabel.setBounds(10, 250, getWidth() - 20, 20);
+    loopingToggle.setBounds(10, 250, getWidth() - 20, 20);
+    currentPositionLabel.setBounds(10, 280, getWidth() - 20, 20);
 }
 
 void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
@@ -137,7 +152,7 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
         float* rightChannelPtr = bufferToFill.buffer->getWritePointer(1);
         int numberOfSamples = bufferToFill.numSamples;
         
-        if(left_combReverbs.getCount() > 0)
+        /* if(left_combReverbs.getCount() > 0)
         {
             for(size_t i = 0; i < numberOfSamples; i++)
             {
@@ -153,7 +168,13 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
                 *(leftChannelPtr+i) += left_allpassReverbs.process(*(leftChannelPtr+i));
                 *(rightChannelPtr+i) += right_allpassReverbs.process(*(rightChannelPtr+i));
             }
-        }
+        } */
+
+        for(size_t i = 0; i < numberOfSamples; i++)
+            {
+                *(leftChannelPtr+i) += left_channel_processing.process(*(leftChannelPtr+i));
+                *(rightChannelPtr+i) += right_channel_processing.process(*(rightChannelPtr+i));
+            }
         
     }
     
@@ -250,6 +271,7 @@ void MainComponent::openButtonClicked()
             readerSource.reset(newSource.release());
             addAllpassButton.setEnabled(true);
             addCombButton.setEnabled(true);
+            addDelayButton.setEnabled(true);
             delaySlider.setEnabled(true);
             gainSlider.setEnabled(true);
         }
@@ -291,7 +313,7 @@ void MainComponent::addAllpassButtonClicked()
     left_allpassReverbs.addBlock(delay_samples, gainSlider.getValue());
     right_allpassReverbs.addBlock(delay_samples, gainSlider.getValue());
 
-    allpassCountLabel.setText(std::to_string(left_allpassReverbs.getCount()), dontSendNotification);
+    allpassCountLabel.setText(std::to_string(++allpassCount), dontSendNotification);
 }
 
 
@@ -302,5 +324,18 @@ void MainComponent::addCombButtonClicked()
     left_combReverbs.addBlock(delay_samples, gainSlider.getValue());
     right_combReverbs.addBlock(delay_samples, gainSlider.getValue());
     
-    combCountLabel.setText(std::to_string(left_combReverbs.getCount()), dontSendNotification);
+    combCountLabel.setText(std::to_string(++combCount), dontSendNotification);
+}
+
+void MainComponent::addDelayButtonClicked()
+{
+    int delay_samples = readerSource->getAudioFormatReader()->sampleRate*delaySlider.getValue()/1000;
+
+    DelayBlock* ptr = new DelayBlock(delay_samples);
+    left_channel_processing.addBlockToPipeline(dynamic_cast<IReverbBlock*>(ptr));
+
+    ptr = new DelayBlock(delay_samples);
+    right_channel_processing.addBlockToPipeline(dynamic_cast<IReverbBlock*>(ptr));
+
+    delayCountLabel.setText(std::to_string(++delayCount), dontSendNotification);
 }

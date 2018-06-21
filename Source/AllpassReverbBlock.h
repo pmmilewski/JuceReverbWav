@@ -1,7 +1,8 @@
 #pragma once
+#include "IReverbBlock.h"
 #include "CombReverbBlock.h"
 
-class AllpassReverbBlock
+class AllpassReverbBlock : public IReverbBlock
 {
 private:
     CombReverbBlock comb;
@@ -12,6 +13,6 @@ public:
     AllpassReverbBlock(const int&, const double&);
     ~AllpassReverbBlock();
     
-    void clear();
-    double process(const double&);
+    void clear() override;
+    double process(const double&) override;
 };

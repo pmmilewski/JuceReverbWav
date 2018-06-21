@@ -1,7 +1,8 @@
 #pragma once
+#include "IReverbBlock.h"
 #include "DelayBlock.h"
 
-class CombReverbBlock
+class CombReverbBlock : public IReverbBlock
 {
 private:
     DelayBlock delay;

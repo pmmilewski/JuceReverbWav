@@ -9,8 +9,10 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "DelayBlock.h"
 #include "CombReverbParallel.h"
 #include "AllpassReverbSeries.h"
+#include "ProcessingPipeline.h"
 
 //==============================================================================
 /*
@@ -55,8 +57,9 @@ private:
     void stopButtonClicked();
     void loopButtonChanged();
 
-    void addAllpassButtonClicked();
     void addCombButtonClicked();
+    void addAllpassButtonClicked();
+    void addDelayButtonClicked();
     //==============================================================================
     // Your private member variables go here...
 
@@ -67,18 +70,24 @@ private:
 
     TextButton addAllpassButton;
     TextButton addCombButton;
+    TextButton addDelayButton;
+
 
     Slider delaySlider;
     Slider gainSlider;
 
     Label allpassCountLabel;
     Label combCountLabel;
+    Label delayCountLabel;
 
     ToggleButton loopingToggle;
     Label currentPositionLabel;
 
     AudioFormatManager formatManager;
     std::unique_ptr<AudioFormatReaderSource> readerSource;
+
+    ProcessingPipeline left_channel_processing;
+    ProcessingPipeline right_channel_processing;
 
     CombReverbParallel left_combReverbs;
     AllpassReverbSeries left_allpassReverbs;
@@ -89,7 +98,7 @@ private:
     AudioTransportSource transportSource;
     TransportState state;
 
-
+    int allpassCount, combCount,delayCount;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

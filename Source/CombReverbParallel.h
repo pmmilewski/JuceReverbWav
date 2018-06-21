@@ -1,8 +1,9 @@
 #pragma once
+#include "IReverbBlock.h"
 #include "CombReverbBlock.h"
 #include <vector>
 
-class CombReverbParallel
+class CombReverbParallel : public IReverbBlock
 {
 private:
     std::vector<CombReverbBlock> blocks;

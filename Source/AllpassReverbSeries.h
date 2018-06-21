@@ -1,8 +1,9 @@
 #pragma once
+#include "IReverbBlock.h"
 #include "AllpassReverbBlock.h"
 #include <vector>
 
-class AllpassReverbSeries
+class AllpassReverbSeries : public IReverbBlock
 {
 private:
     std::vector<AllpassReverbBlock> blocks;
