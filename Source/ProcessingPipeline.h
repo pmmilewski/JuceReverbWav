@@ -7,7 +7,6 @@
 class ProcessingPipeline
 {
 private:
-    //std::vector<uptr> processingBlocks;
     std::vector<IReverbBlock*> processingBlocks;
 public:
     ProcessingPipeline();

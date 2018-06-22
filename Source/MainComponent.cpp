@@ -16,11 +16,11 @@ MainComponent::MainComponent()
     allpassCount = 0;
     combCount = 0;
 
-    left_allpassReverbs = AllpassReverbSeries();
-    left_combReverbs = CombReverbParallel();
+    leftAllpassReverbSeriesToAdd = nullptr;
+    rightAllpassReverbSeriesToAdd = nullptr;
 
-    right_allpassReverbs = AllpassReverbSeries();
-    right_combReverbs = CombReverbParallel();
+    leftCombReverbParallelToAdd = nullptr;
+    rightCombReverbParallelToAdd = nullptr;
 
     formatManager.registerBasicFormats();
     transportSource.addChangeListener(this);
@@ -43,22 +43,34 @@ MainComponent::MainComponent()
     stopButton.setEnabled(false);
 
     addAndMakeVisible(&addAllpassButton);
-    addAllpassButton.setButtonText("Add Allpass block");
+    addAllpassButton.setButtonText("Add Allpass block to serie");
     addAllpassButton.onClick = [this] { addAllpassButtonClicked(); };
     addAllpassButton.setColour(TextButton::buttonOnColourId, Colours::blue);
     addAllpassButton.setEnabled(false);
 
     addAndMakeVisible(&addCombButton);
-    addCombButton.setButtonText("Add Comb block");
+    addCombButton.setButtonText("Add Comb block to serie");
     addCombButton.onClick = [this] { addCombButtonClicked(); };
     addCombButton.setColour(TextButton::buttonOnColourId, Colours::blue);
     addCombButton.setEnabled(false);
 
     addAndMakeVisible(&addDelayButton);
-    addCombButton.setButtonText("Add Delay block");
-    addCombButton.onClick = [this] { addDelayButtonClicked(); };
-    addCombButton.setColour(TextButton::buttonOnColourId, Colours::blue);
-    addCombButton.setEnabled(false);
+    addDelayButton.setButtonText("Add Delay block to pipeline");
+    addDelayButton.onClick = [this] { addDelayButtonClicked(); };
+    addDelayButton.setColour(TextButton::buttonOnColourId, Colours::blue);
+    addDelayButton.setEnabled(false);
+
+    addAndMakeVisible(&addAPSerieToPipelineButton);
+    addAPSerieToPipelineButton.setButtonText("Add allpass serie to pipeline");
+    addAPSerieToPipelineButton.onClick = [this] { addAPSerieToPipelineButtonClicked(); };
+    addAPSerieToPipelineButton.setColour(TextButton::buttonOnColourId, Colours::blue);
+    addAPSerieToPipelineButton.setEnabled(false);
+
+    addAndMakeVisible(&addCombSerieToPipelineButton);
+    addCombSerieToPipelineButton.setButtonText("Add parallel combs to pipeline");
+    addCombSerieToPipelineButton.onClick = [this] { addCombSerieToPipelineButtonClicked(); };
+    addCombSerieToPipelineButton.setColour(TextButton::buttonOnColourId, Colours::blue);
+    addCombSerieToPipelineButton.setEnabled(false);
 
     addAndMakeVisible(&delaySlider);
     delaySlider.setRange(1.0, 1000.0, 1.0);
@@ -69,6 +81,11 @@ MainComponent::MainComponent()
     gainSlider.setRange(0.01, 0.99, 0.01);
     gainSlider.setValue(0.7);
     gainSlider.setEnabled(false);
+
+    addAndMakeVisible(&dryWetSlider);
+    dryWetSlider.setRange(0.00, 1.00, 0.01);
+    dryWetSlider.setValue(0.5);
+    dryWetSlider.setEnabled(false);
 
     addAndMakeVisible(&allpassCountLabel);
     allpassCountLabel.setText(std::to_string(allpassCount), dontSendNotification);
@@ -86,7 +103,7 @@ MainComponent::MainComponent()
     addAndMakeVisible(&currentPositionLabel);
     currentPositionLabel.setText("Stopped", dontSendNotification);
 
-    setSize(600, 400);
+    setSize(600, 600);
 
     setAudioChannels(2, 2);
     startTimer(20);
@@ -112,16 +129,23 @@ void MainComponent::resized()
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
+
     openButton.setBounds(10, 10, getWidth() - 20, 20);
     playButton.setBounds(10, 40, getWidth() - 20, 20);
     stopButton.setBounds(10, 70, getWidth() - 20, 20);
 
     delaySlider.setBounds(10, 100, getWidth() - 20, 20);
     gainSlider.setBounds(10, 130, getWidth() - 20, 20);
+    dryWetSlider.setBounds(10, 400, getWidth() - 20, 20);
+    
 
     addDelayButton.setBounds(10, 160, getWidth() - 20, 20);
-    addAllpassButton.setBounds(10, 220, getWidth() - 20, 20);
-    addCombButton.setBounds(10, 190, getWidth() - 20, 20);
+
+    addAllpassButton.setBounds(10, 220, getWidth()/2 - 15, 20);
+    addAPSerieToPipelineButton.setBounds(10 + getWidth()/2 - 15 + 10, 220, getWidth()/2 - 15, 20);
+
+    addCombButton.setBounds(10, 190, getWidth()/2 - 15, 20);
+    addCombSerieToPipelineButton.setBounds(10 + getWidth()/2 - 15 + 10, 190, getWidth()/2 - 15, 20);
 
     delayCountLabel.setBounds(10, 310, getWidth() - 20, 20);
     allpassCountLabel.setBounds(10, 370, getWidth() - 20, 20);
@@ -151,30 +175,12 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
         float* leftChannelPtr = bufferToFill.buffer->getWritePointer(0);
         float* rightChannelPtr = bufferToFill.buffer->getWritePointer(1);
         int numberOfSamples = bufferToFill.numSamples;
-        
-        /* if(left_combReverbs.getCount() > 0)
-        {
-            for(size_t i = 0; i < numberOfSamples; i++)
-            {
-                *(leftChannelPtr+i) += left_combReverbs.process(*(leftChannelPtr+i));
-                *(rightChannelPtr+i) += right_combReverbs.process(*(rightChannelPtr+i));
-            }   
-        }
-        
-        if(left_allpassReverbs.getCount() > 0)
-        {
-            for(size_t i = 0; i < numberOfSamples; i++)
-            {
-                *(leftChannelPtr+i) += left_allpassReverbs.process(*(leftChannelPtr+i));
-                *(rightChannelPtr+i) += right_allpassReverbs.process(*(rightChannelPtr+i));
-            }
-        } */
 
         for(size_t i = 0; i < numberOfSamples; i++)
-            {
-                *(leftChannelPtr+i) += left_channel_processing.process(*(leftChannelPtr+i));
-                *(rightChannelPtr+i) += right_channel_processing.process(*(rightChannelPtr+i));
-            }
+        {
+            *(leftChannelPtr+i) += dryWetSlider.getValue()*left_channel_processing.process(*(leftChannelPtr+i));
+            *(rightChannelPtr+i) += dryWetSlider.getValue()*right_channel_processing.process(*(rightChannelPtr+i));
+        }
         
     }
     
@@ -274,23 +280,16 @@ void MainComponent::openButtonClicked()
             addDelayButton.setEnabled(true);
             delaySlider.setEnabled(true);
             gainSlider.setEnabled(true);
+            dryWetSlider.setEnabled(true);
         }
     }
 }
 
 void MainComponent::playButtonClicked()
 {
-    if(left_allpassReverbs.getCount() != 0)
-    {
-        left_allpassReverbs.clear();
-        right_allpassReverbs.clear();
-    }
-    
-    if(left_combReverbs.getCount() != 0)
-    {
-        left_combReverbs.clear();
-        right_combReverbs.clear();
-    }
+
+    left_channel_processing.clear();
+    right_channel_processing.clear();
 
     updateLoopState(loopingToggle.getToggleState());
     changeState(Starting);
@@ -310,9 +309,20 @@ void MainComponent::addAllpassButtonClicked()
 {
     int delay_samples = readerSource->getAudioFormatReader()->sampleRate*delaySlider.getValue()/1000;
 
-    left_allpassReverbs.addBlock(delay_samples, gainSlider.getValue());
-    right_allpassReverbs.addBlock(delay_samples, gainSlider.getValue());
+    if(leftAllpassReverbSeriesToAdd == nullptr)
+    {
+        leftAllpassReverbSeriesToAdd = new AllpassReverbSeries();
+    }
 
+    if(rightAllpassReverbSeriesToAdd == nullptr)
+    {
+        rightAllpassReverbSeriesToAdd = new AllpassReverbSeries();
+    }
+
+    leftAllpassReverbSeriesToAdd->addBlock(delay_samples, gainSlider.getValue());
+    rightAllpassReverbSeriesToAdd->addBlock(delay_samples, gainSlider.getValue());  
+
+    addAPSerieToPipelineButton.setEnabled(true);
     allpassCountLabel.setText(std::to_string(++allpassCount), dontSendNotification);
 }
 
@@ -321,9 +331,20 @@ void MainComponent::addCombButtonClicked()
 {
     int delay_samples = readerSource->getAudioFormatReader()->sampleRate*delaySlider.getValue()/1000;
 
-    left_combReverbs.addBlock(delay_samples, gainSlider.getValue());
-    right_combReverbs.addBlock(delay_samples, gainSlider.getValue());
+    if(leftCombReverbParallelToAdd == nullptr)
+    {
+        leftCombReverbParallelToAdd = new CombReverbParallel();
+    }
+
+    if(rightCombReverbParallelToAdd == nullptr)
+    {
+        rightCombReverbParallelToAdd = new CombReverbParallel();
+    }
+
+    leftCombReverbParallelToAdd->addBlock(delay_samples, gainSlider.getValue());
+    rightCombReverbParallelToAdd->addBlock(delay_samples, gainSlider.getValue());  
     
+    addCombSerieToPipelineButton.setEnabled(true);
     combCountLabel.setText(std::to_string(++combCount), dontSendNotification);
 }
 
@@ -338,4 +359,32 @@ void MainComponent::addDelayButtonClicked()
     right_channel_processing.addBlockToPipeline(dynamic_cast<IReverbBlock*>(ptr));
 
     delayCountLabel.setText(std::to_string(++delayCount), dontSendNotification);
+}
+
+void MainComponent::addCombSerieToPipelineButtonClicked()
+{
+    left_channel_processing.addBlockToPipeline(dynamic_cast<IReverbBlock*>(leftCombReverbParallelToAdd));
+    right_channel_processing.addBlockToPipeline(dynamic_cast<IReverbBlock*>(rightCombReverbParallelToAdd));
+
+    leftCombReverbParallelToAdd = nullptr;
+    rightCombReverbParallelToAdd = nullptr;
+    combCount = 0;
+    
+    addCombSerieToPipelineButton.setEnabled(false);
+
+    combCountLabel.setText(std::to_string(combCount), dontSendNotification);
+
+}
+
+void MainComponent::addAPSerieToPipelineButtonClicked()
+{   
+    left_channel_processing.addBlockToPipeline(dynamic_cast<IReverbBlock*>(leftAllpassReverbSeriesToAdd));
+    right_channel_processing.addBlockToPipeline(dynamic_cast<IReverbBlock*>(rightAllpassReverbSeriesToAdd));
+
+    leftAllpassReverbSeriesToAdd = nullptr;
+    rightAllpassReverbSeriesToAdd = nullptr;
+    allpassCount = 0;
+    addAPSerieToPipelineButton.setEnabled(false);
+
+    allpassCountLabel.setText(std::to_string(allpassCount), dontSendNotification);
 }

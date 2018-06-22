@@ -21,6 +21,10 @@ void ProcessingPipeline::addBlockToPipeline(IReverbBlock* block)
 
 double ProcessingPipeline::process(const double& input_sample)
 {
+    if(processingBlocks.size() == 0)
+    {
+        return 0.0;
+    }
     double output{input_sample};
     for(auto& block: processingBlocks)
     {

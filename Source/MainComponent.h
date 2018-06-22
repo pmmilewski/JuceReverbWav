@@ -60,6 +60,9 @@ private:
     void addCombButtonClicked();
     void addAllpassButtonClicked();
     void addDelayButtonClicked();
+
+    void addAPSerieToPipelineButtonClicked();
+    void addCombSerieToPipelineButtonClicked();
     //==============================================================================
     // Your private member variables go here...
 
@@ -72,9 +75,13 @@ private:
     TextButton addCombButton;
     TextButton addDelayButton;
 
+    TextButton addAPSerieToPipelineButton;
+    TextButton addCombSerieToPipelineButton;
+
 
     Slider delaySlider;
     Slider gainSlider;
+    Slider dryWetSlider;
 
     Label allpassCountLabel;
     Label combCountLabel;
@@ -89,11 +96,11 @@ private:
     ProcessingPipeline left_channel_processing;
     ProcessingPipeline right_channel_processing;
 
-    CombReverbParallel left_combReverbs;
-    AllpassReverbSeries left_allpassReverbs;
+    AllpassReverbSeries* leftAllpassReverbSeriesToAdd;
+    AllpassReverbSeries* rightAllpassReverbSeriesToAdd;
 
-    CombReverbParallel right_combReverbs;
-    AllpassReverbSeries right_allpassReverbs;
+    CombReverbParallel* leftCombReverbParallelToAdd;
+    CombReverbParallel* rightCombReverbParallelToAdd;
 
     AudioTransportSource transportSource;
     TransportState state;
