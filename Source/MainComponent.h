@@ -48,11 +48,16 @@ private:
         Stopped,
         Starting,
         Playing,
-        Stopping
+        Stopping,
+        ImpulseTest,
+        ImpulseStop
     };
 
     void changeState (TransportState);
     void openButtonClicked();
+    void impulseButtonClicked();
+    void playImpulseButtonClicked();
+
     void playButtonClicked();
     void stopButtonClicked();
     void loopButtonChanged();
@@ -68,6 +73,7 @@ private:
 
     TextButton openButton;
     TextButton playButton;
+    TextButton playImpulseButton;
     TextButton stopButton;
 
 
@@ -78,6 +84,7 @@ private:
     TextButton addAPSerieToPipelineButton;
     TextButton addCombSerieToPipelineButton;
 
+    ToggleButton impulseButton;
 
     Slider delaySlider;
     Slider gainSlider;
@@ -103,6 +110,8 @@ private:
     CombReverbParallel* rightCombReverbParallelToAdd;
 
     AudioTransportSource transportSource;
+    bool fileLoaded;
+    bool impulsePlayed;
     TransportState state;
 
     int allpassCount, combCount,delayCount;

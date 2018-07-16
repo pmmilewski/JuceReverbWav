@@ -15,6 +15,9 @@ MainComponent::MainComponent()
     delayCount = 0;
     allpassCount = 0;
     combCount = 0;
+    
+    fileLoaded = false;
+    impulsePlayed = false;
 
     leftAllpassReverbSeriesToAdd = nullptr;
     rightAllpassReverbSeriesToAdd = nullptr;
@@ -36,11 +39,23 @@ MainComponent::MainComponent()
     playButton.setColour(TextButton::buttonColourId, Colours::green);
     playButton.setEnabled(false);
 
+    addAndMakeVisible(&playImpulseButton);
+    playImpulseButton.setButtonText("Play impulse");
+    playImpulseButton.onClick = [this] { playImpulseButtonClicked(); };
+    playImpulseButton.setColour(TextButton::buttonColourId, Colours::green);
+    playImpulseButton.setEnabled(false);
+
     addAndMakeVisible(&stopButton);
     stopButton.setButtonText("Stop");
     stopButton.onClick = [this] { stopButtonClicked(); };
     stopButton.setColour(TextButton::buttonColourId, Colours::red);
     stopButton.setEnabled(false);
+
+    addAndMakeVisible(&impulseButton);
+    impulseButton.setButtonText("Test with impulse");
+    impulseButton.onClick = [this] { impulseButtonClicked(); };
+    impulseButton.setColour(TextButton::buttonColourId, Colours::red);
+    impulseButton.setEnabled(true);
 
     addAndMakeVisible(&addAllpassButton);
     addAllpassButton.setButtonText("Add Allpass block to serie");
@@ -131,8 +146,9 @@ void MainComponent::resized()
     // update their positions.
 
     openButton.setBounds(10, 10, getWidth() - 20, 20);
-    playButton.setBounds(10, 40, getWidth() - 20, 20);
-    stopButton.setBounds(10, 70, getWidth() - 20, 20);
+    impulseButton.setBounds(10, 40, getWidth() - 20, 20);
+    stopButton.setBounds(10 + getWidth()/2 - 15 + 10, 70, getWidth()/2 - 15, 20);
+    playButton.setBounds(10, 70, getWidth()/2 - 15, 20);
 
     delaySlider.setBounds(10, 100, getWidth() - 20, 20);
     gainSlider.setBounds(10, 130, getWidth() - 20, 20);
@@ -153,6 +169,8 @@ void MainComponent::resized()
 
     loopingToggle.setBounds(10, 250, getWidth() - 20, 20);
     currentPositionLabel.setBounds(10, 280, getWidth() - 20, 20);
+
+    playImpulseButton.setBounds(10, 430, getWidth()/2 - 15, 20);
 }
 
 void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
@@ -168,10 +186,30 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
         return;
     }
 
-    transportSource.getNextAudioBlock(bufferToFill);
-    
+    if (impulseButton.getState() && state == TransportState::ImpulseTest)
+    {
+        float* leftChannelPtr = bufferToFill.buffer->getWritePointer(0);
+        float* rightChannelPtr = bufferToFill.buffer->getWritePointer(1);
+        int numberOfSamples = bufferToFill.numSamples;
+
+        for(size_t i = 0; i < numberOfSamples; i++)
+        {
+            if(!impulsePlayed)
+            {
+                *(leftChannelPtr+i) += dryWetSlider.getValue()*left_channel_processing.process(1.0);
+                *(rightChannelPtr+i) += dryWetSlider.getValue()*right_channel_processing.process(1.0);
+                impulsePlayed = true;
+            }
+            *(leftChannelPtr+i) += dryWetSlider.getValue()*left_channel_processing.process(0.0);
+            *(rightChannelPtr+i) += dryWetSlider.getValue()*right_channel_processing.process(0.0);
+        }
+        return;
+    }
+
     if(state == TransportState::Playing)
     {
+        transportSource.getNextAudioBlock(bufferToFill);
+
         float* leftChannelPtr = bufferToFill.buffer->getWritePointer(0);
         float* rightChannelPtr = bufferToFill.buffer->getWritePointer(1);
         int numberOfSamples = bufferToFill.numSamples;
@@ -181,7 +219,7 @@ void MainComponent::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill
             *(leftChannelPtr+i) += dryWetSlider.getValue()*left_channel_processing.process(*(leftChannelPtr+i));
             *(rightChannelPtr+i) += dryWetSlider.getValue()*right_channel_processing.process(*(rightChannelPtr+i));
         }
-        
+        return;
     }
     
 }
@@ -254,6 +292,15 @@ void MainComponent::changeState(TransportState newState)
         case Stopping:
             transportSource.stop();
             break;
+
+        case ImpulseTest:
+            playImpulseButton.setEnabled(false);
+            break;
+
+        case ImpulseStop:
+            playImpulseButton.setEnabled(true);
+            changeState(TransportState::Stopped);
+            break;
         }
     }
 }
@@ -273,6 +320,7 @@ void MainComponent::openButtonClicked()
         {
             std::unique_ptr<AudioFormatReaderSource> newSource(new AudioFormatReaderSource(reader, true));
             transportSource.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
+            fileLoaded = true;
             playButton.setEnabled(true);
             readerSource.reset(newSource.release());
             addAllpassButton.setEnabled(true);
@@ -298,6 +346,24 @@ void MainComponent::playButtonClicked()
 void MainComponent::stopButtonClicked()
 {
     changeState(Stopping);
+}
+
+void MainComponent::impulseButtonClicked()
+{
+    if(impulseButton.getToggleState())
+    {
+        playImpulseButton.setEnabled(true);
+    }
+    else if(!impulseButton.getToggleState())
+    {
+        playImpulseButton.setEnabled(false);
+    }
+}
+
+void MainComponent::playImpulseButtonClicked()
+{
+    if(state == TransportState::Stopped)
+        changeState(ImpulseTest);
 }
 
 void MainComponent::loopButtonChanged()
