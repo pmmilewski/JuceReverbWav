@@ -43,17 +43,32 @@ public:
     void updateLoopState (bool);
 
 private:
-     enum TransportState
+     enum class TransportState
     {
         Stopped,
         Starting,
         Playing,
-        Stopping,
-        ImpulseTest,
-        ImpulseStop
+        Stopping
     };
 
+    enum class ImpulseTestState
+    {
+        Stopped,
+        Starting,
+        Playing,
+        Stopping
+    };
+
+    enum Mode
+    {
+        WAV,
+        ImpulseTest,
+        Other
+    };
+
+
     void changeState (TransportState);
+    void changeState (ImpulseTestState);
     void openButtonClicked();
     void impulseButtonClicked();
     void playImpulseButtonClicked();
@@ -61,6 +76,11 @@ private:
     void playButtonClicked();
     void stopButtonClicked();
     void loopButtonChanged();
+
+    void enableReverbControls();
+    void disableReverbControls();
+
+    float getSampleRate();
 
     void addCombButtonClicked();
     void addAllpassButtonClicked();
@@ -90,6 +110,7 @@ private:
     Slider gainSlider;
     Slider dryWetSlider;
 
+    Label rtLabel;
     Label allpassCountLabel;
     Label combCountLabel;
     Label delayCountLabel;
@@ -99,6 +120,7 @@ private:
 
     AudioFormatManager formatManager;
     std::unique_ptr<AudioFormatReaderSource> readerSource;
+    AudioDeviceManager::AudioDeviceSetup deviceSetup;
 
     ProcessingPipeline left_channel_processing;
     ProcessingPipeline right_channel_processing;
@@ -112,9 +134,13 @@ private:
     AudioTransportSource transportSource;
     bool fileLoaded;
     bool impulsePlayed;
-    TransportState state;
+
+    TransportState tState;
+    ImpulseTestState iState;
+    Mode currentMode;
 
     int allpassCount, combCount,delayCount;
+    float reverbTime;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
